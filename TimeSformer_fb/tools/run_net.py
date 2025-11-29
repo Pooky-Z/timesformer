@@ -1,6 +1,10 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
 
 """Wrapper to train and test a video classification model."""
+import sys
+import os
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from timesformer.utils.misc import launch_job
 from timesformer.utils.parser import load_config, parse_args
 

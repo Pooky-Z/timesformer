@@ -138,10 +138,9 @@ def train_epoch(
                 loss = loss.item()
             else:
                 # Compute the errors.
-                num_topks_correct = metrics.topks_correct(preds, labels, (1, 5))
-                top1_err, top5_err = [
-                    (1.0 - x / preds.size(0)) * 100.0 for x in num_topks_correct
-                ]
+                num_topks_correct = metrics.topks_correct(preds, labels, (1,))
+                top1_err = (1.0 - num_topks_correct[0] / preds.size(0)) * 100.0
+                top5_err = torch.zeros_like(top1_err) # top5 is not available for binary classification
                 # Gather all the predictions across all the devices.
                 if cfg.NUM_GPUS > 1:
                     loss, top1_err, top5_err = du.all_reduce(
@@ -251,12 +250,11 @@ def eval_epoch(val_loader, model, val_meter, cur_epoch, cfg, writer=None):
                     preds, labels = du.all_gather([preds, labels])
             else:
                 # Compute the errors.
-                num_topks_correct = metrics.topks_correct(preds, labels, (1, 5))
+                num_topks_correct = metrics.topks_correct(preds, labels, (1,))
 
                 # Combine the errors across the GPUs.
-                top1_err, top5_err = [
-                    (1.0 - x / preds.size(0)) * 100.0 for x in num_topks_correct
-                ]
+                top1_err = (1.0 - num_topks_correct[0] / preds.size(0)) * 100.0
+                top5_err = torch.zeros_like(top1_err) # top5 is not available for binary classification
                 if cfg.NUM_GPUS > 1:
                     top1_err, top5_err = du.all_reduce([top1_err, top5_err])
 

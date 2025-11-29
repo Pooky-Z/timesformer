@@ -56,9 +56,14 @@ def main():
     
     random.shuffle(samples)
     
-    val_size = int(len(samples) * args.val_ratio)
-    train_samples = samples[val_size:]
-    val_samples = samples[:val_size]
+    # Split: 80% train, 10% val, 10% test
+    n_total = len(samples)
+    n_val = int(n_total * 0.1)
+    n_test = int(n_total * 0.1)
+    
+    val_samples = samples[:n_val]
+    test_samples = samples[n_val:n_val+n_test]
+    train_samples = samples[n_val+n_test:]
     
     os.makedirs(args.output_dir, exist_ok=True)
     
@@ -69,8 +74,12 @@ def main():
     with open(os.path.join(args.output_dir, "val.csv"), "w") as f:
         for path, label in val_samples:
             f.write(f"{path} {label}\n")
+
+    with open(os.path.join(args.output_dir, "test.csv"), "w") as f:
+        for path, label in test_samples:
+            f.write(f"{path} {label}\n")
             
-    print(f"Saved {len(train_samples)} training samples and {len(val_samples)} validation samples to {args.output_dir}")
+    print(f"Saved {len(train_samples)} train, {len(val_samples)} val, {len(test_samples)} test samples to {args.output_dir}")
 
 if __name__ == "__main__":
     main()
